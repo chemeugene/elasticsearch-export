@@ -1,0 +1,5 @@
+elasticsearch:
+  url: http://localhost:9200
+bulk:
+  size: 10000  
+  
