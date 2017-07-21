@@ -31,7 +31,7 @@ public class CsvExporter {
 	@Value("${bulk.size}")
 	private Integer bulkSize;
 
-	private final static String SEARCH_ALL_REQUEST = "{ \"query\": { \"match_all\": {} } }";
+	private final static String SEARCH_ALL_REQUEST = "{ \"query\": { \"match_all\": {} }, \"sort\": [{\"date\": {\"order\": \"desc\"}}] }";
 
 	public void executeExport(String index, String[] columns,
 			String outputFileName) {
