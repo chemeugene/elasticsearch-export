@@ -1,10 +1,10 @@
 package com.tecomgroup.elasticsearch.export;
 
-import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.Arrays;
 import java.util.List;
 
 import io.searchbox.client.JestClient;
@@ -14,6 +14,9 @@ import io.searchbox.core.SearchResult;
 import io.searchbox.core.SearchScroll;
 import io.searchbox.params.Parameters;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,11 +34,23 @@ public class CsvExporter {
 	@Value("${bulk.size}")
 	private Integer bulkSize;
 
-	private final static String SEARCH_ALL_REQUEST = "{ \"query\": { \"match_all\": {} }, \"sort\": [{\"date\": {\"order\": \"desc\"}}] }";
+	private final static JSONObject SEARCH_ALL_REQUEST = new JSONObject();
+	
+	static {
+		try {
+			SEARCH_ALL_REQUEST
+			.put("query", new JSONObject().put("match_all", new JSONObject()))
+			.put("sort", new JSONArray().put(new JSONObject().put("date", new JSONObject().put("order", "desc"))));
+		} catch (JSONException e) {
+		}
+	}
 
 	public void executeExport(String index, String[] columns,
-			String outputFileName) {
-		Search search = new Search.Builder(SEARCH_ALL_REQUEST)
+			String outputFileName) throws JSONException {
+		if (columns != null && columns.length > 0) {
+			SEARCH_ALL_REQUEST.put("fields", new JSONArray(Arrays.asList(columns)));
+		}
+		Search search = new Search.Builder(SEARCH_ALL_REQUEST.toString())
 				.addIndex(index)
 				.setParameter(Parameters.SIZE, bulkSize)
 				.setParameter(Parameters.SCROLL, "5m")
