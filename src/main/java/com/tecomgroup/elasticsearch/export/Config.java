@@ -13,12 +13,15 @@ public class Config {
 	
 	@Value("${elasticsearch.url}")
 	private String elasticSearchUrl;
+	
+	@Value("${elasticsearch.readTimeoutMs}")
+	private Integer readTimeoutMs;
 
 	@Bean
 	public JestClient jestClient() {
 		JestClientFactory factory = new JestClientFactory();
 		factory.setHttpClientConfig(new HttpClientConfig.Builder(
-				elasticSearchUrl).multiThreaded(true).build());
+				elasticSearchUrl).multiThreaded(true).readTimeout(readTimeoutMs).build());
 		
 		return factory.getObject();
 	}

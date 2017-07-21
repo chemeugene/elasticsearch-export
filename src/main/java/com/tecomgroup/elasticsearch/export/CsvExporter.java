@@ -51,26 +51,26 @@ public class CsvExporter {
 			//Write first batch or records
 			List<String> records = result.getSourceAsStringList();
 			writeAndFlushRecords(records, writer);
-			//Write all remaining records			
-			executeScroll(writer, scrollId);
+			int size = records.size();
+			//Write all remaining records
+			while (size > 0) {
+				size = executeScroll(writer, scrollId);
+			}
 		} catch (Exception e) {
 			LOGGER.error("Unable to perform export", e);
 		}
 	}
 	
-	private void executeScroll(PrintWriter writer, String scrollId) {
+	private int executeScroll(PrintWriter writer, String scrollId) {
 		try {
-			SearchScroll scroll = new SearchScroll.Builder(scrollId, "5m")
-			.build();			
+			SearchScroll scroll = new SearchScroll.Builder(scrollId, "5m").build();			
 			JestResult result = jestApi.execute(scroll);
 			List<String> records = result.getSourceAsStringList();
 			writeAndFlushRecords(records, writer);
-			System.gc();
-			if (records.size() > 0) {
-				executeScroll(writer, scrollId);
-			}
+			return records.size();
 		} catch (IOException e) {
 			LOGGER.error("Exception while fetch records from elasticsearch", e);
+			return 0;
 		}
 	}
 	

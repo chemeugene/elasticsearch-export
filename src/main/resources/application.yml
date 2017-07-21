@@ -1,5 +1,6 @@
 elasticsearch:
   url: http://localhost:9200
+  readTimeoutMs: 10000
 bulk:
   size: 10000  
   
